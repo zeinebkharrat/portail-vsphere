@@ -77,3 +77,26 @@ jobs:
           format: 'table'
           exit-code: '0'
           severity: 'CRITICAL,HIGH'
+
+  deploy:
+    name: Deploy to Production Server
+    needs: [build-backend, build-frontend]
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          script: |
+            cd ~/portail-vsphere
+            git pull origin main
+            docker build -t vsphere-backend .
+            cd frontend && docker build -t vsphere-frontend . && cd ..
+            docker stop vsphere-backend vsphere-frontend || true
+            docker rm vsphere-backend vsphere-frontend || true
+            docker run -d -p 8000:8000 --name vsphere-backend vsphere-backend
+            docker run -d -p 80:80 --name vsphere-frontend vsphere-frontend

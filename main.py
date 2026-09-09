@@ -8,7 +8,7 @@ from pyVim.connect import SmartConnect, Disconnect
 from pyVmomi import vim
 
 app = FastAPI()
-
+# Test mise a jour automatique CI/CD
 # Middleware CORS indispensable pour le Dashboard React (Vite)
 app.add_middleware(
     CORSMiddleware,
